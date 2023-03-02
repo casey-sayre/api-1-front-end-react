@@ -7,7 +7,7 @@
 		"ghcr.io/devcontainers/features/git:1": {}
 	},
 
-  "runArgs": ["--network=api-network", "--name=react-api-1-devcontainer"]
+  "runArgs": ["--network=api-1-network", "--name=react-api-1-devcontainer"]
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
