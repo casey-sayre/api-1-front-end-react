@@ -24,6 +24,7 @@ export function useDebounce<Func extends SomeFunction>(
 
   const debouncedFunction = ((...args) => {
     const newTimer = setTimeout(() => {
+      console.log("calling")
       func(...args);
     }, delay);
     clearTimeout(timer.current);

@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import { Button, Grid, Paper } from '@mui/material';
 import axios from 'axios';
 import { Albums } from './Albums';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { IAlbum } from './Album';
+import { useDebounce } from './useDebounce';
+import { WebSocketStatus } from './WebSocketStatus';
+import useWebSocket from 'react-use-websocket';
 
 const defaultAlbums = new Array<IAlbum>()
 
@@ -20,20 +19,12 @@ export default function App() {
   const { readyState } = useWebSocket(socketUrl, {
     onMessage: (event: WebSocketEventMap["message"]) => {
       console.log("socket", event.data)
-      let editedAlbum = JSON.parse(event.data)
+      let editedAlbum: IAlbum = JSON.parse(event.data)
       setAlbums(albums.map(album => {
         return editedAlbum.id === album.id ? editedAlbum : album;
       }))
     }
   });
-
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Open',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Closed',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-  }[readyState];
 
   // album data
   useEffect(() => {
@@ -50,7 +41,7 @@ export default function App() {
       })
   }, [])
 
-  const updateAlbum = (album: IAlbum) => {
+  const updateAlbum = useDebounce((album: IAlbum) => {
     axios.patch<IAlbum>(`http://localhost:8080/albums/${album.id}`, album, {
       headers: {
         'Content-Type': 'application/json'
@@ -64,21 +55,11 @@ export default function App() {
       .catch((ex) => {
         console.log(ex.toString())
       })
-  }
+  }, 500);
 
   return (
     <Container maxWidth="md">
-      <Grid container>
-        <Grid item flex={1} />
-        <Grid item>
-          <Typography variant="body1" color="primary">
-            Websocket is&nbsp;</Typography>
-        </Grid>
-        <Grid item>
-          <Typography display={"inline"} color={readyState === ReadyState.OPEN ? "secondary" : "error"}>{connectionStatus}
-          </Typography>
-        </Grid>
-      </Grid>
+      <WebSocketStatus readyState={readyState} />
       <Albums albums={albums} updateHandler={updateAlbum} />
     </Container>
   );
