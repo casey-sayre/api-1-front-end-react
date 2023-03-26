@@ -23,7 +23,13 @@ export default function App() {
       setAlbums(albums.map(album => {
         return editedAlbum.id === album.id ? editedAlbum : album;
       }))
-    }
+    },
+    onError: (event: Event) => {
+      console.log(event);
+    },
+    onClose: (event: Event) => {
+      console.log(event);
+    },
   });
 
   // album data
